@@ -1,0 +1,47 @@
+# Lesson 3. Serving GraphQL over HTTP.
+#
+# GraphQL is the document. HTTP is how this process receives it.
+# The Express server listens on port 3000. Nest mounts Apollo at /graphql.
+#
+# POST application/json is the normal request:
+#   { "query": "...", "variables": { }, "operationName": "Service" }
+# Send one header so a browser form cannot forge the call:
+#   apollo-require-preflight: true
+# A content-type of application/json also satisfies that check.
+#
+# GET is for queries only, and only with that header. A mutation on GET is
+# rejected even with the header. A GET with no header is rejected as CSRF.
+# Use these with an HTTP client, or curl. GraphiQL already sends POST.
+
+### Health is plain HTTP. It is not a GraphQL operation.
+GET http://localhost:3000/health
+
+### Query over POST
+POST http://localhost:3000/graphql
+Content-Type: application/json
+apollo-require-preflight: true
+
+{
+  "operationName": "Service",
+  "query": "query Service { serviceInfo { name graphqlPath transports } }"
+}
+
+### The same query over GET. Mutations are not allowed on this method.
+GET http://localhost:3000/graphql?query={serviceInfo{name graphqlPath transports}}
+apollo-require-preflight: true
+
+### This GET is blocked. No preflight header, no JSON content-type.
+GET http://localhost:3000/graphql?query={serviceInfo{name}}
+
+### This mutation is blocked because the method is GET.
+GET http://localhost:3000/graphql?query=mutation { deleteBook(id: "1") }
+apollo-require-preflight: true
+
+### Two operations in one document. operationName chooses one.
+POST http://localhost:3000/graphql
+Content-Type: application/json
+
+{
+  "operationName": "Service",
+  "query": "query Service { serviceInfo { name } } query Stats { libraryStats { bookCount } }"
+}

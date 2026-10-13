@@ -1,0 +1,48 @@
+# Lesson 4. Pagination.
+#
+# books returns a short list and is capped. Do not build a screen on it.
+# booksPage is offset pagination: page numbers. Simple, and unstable if a row
+# is inserted at the top while the user is clicking Next.
+# booksConnection is cursor pagination. The client keeps the endCursor and
+# sends it back as `after`. It never asks for "page 4".
+
+query OffsetPage($page: Int!, $pageSize: Int!, $search: String) {
+  booksPage(page: $page, pageSize: $pageSize, search: $search) {
+    page
+    pageSize
+    totalCount
+    totalPages
+    items {
+      id
+      title
+      year
+    }
+  }
+}
+
+# Variables: { "page": 1, "pageSize": 2 }
+
+query CursorPage($first: Int!, $after: String) {
+  booksConnection(first: $first, after: $after) {
+    totalCount
+    pageInfo {
+      endCursor
+      hasNextPage
+    }
+    edges {
+      cursor
+      node {
+        id
+        title
+      }
+    }
+  }
+}
+
+# First window:  { "first": 2 }
+# Next window:   copy endCursor into after.
+# { "first": 2, "after": "<endCursor from the previous response>" }
+#
+# pageSize and first cannot be above 10. That limit is in the service,
+# next to the depth and cost limits, because a huge page is a performance
+# problem and a denial-of-service problem.

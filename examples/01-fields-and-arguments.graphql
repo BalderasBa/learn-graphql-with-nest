@@ -1,0 +1,26 @@
+# Lesson 1a. Fields and arguments.
+# Paste this into http://localhost:3000/graphql
+#
+# A field is one thing you ask for. `title` is a field. `author` is a field
+# that has its own fields. The server only runs the resolvers for the fields
+# in your selection, so leaving `reviews` out means reviews are not loaded.
+#
+# An argument changes one field. `book(id:)` picks a row. `reviews(minRating:)`
+# filters that book's reviews. Arguments belong to the field, not to the query.
+
+query FieldsAndArguments {
+  book(id: "1") {
+    id
+    title
+    year
+    author {
+      id
+      name
+    }
+    reviews(minRating: 5) {
+      rating
+      body
+      reviewerName
+    }
+  }
+}

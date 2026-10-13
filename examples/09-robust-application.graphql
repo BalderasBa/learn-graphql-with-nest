@@ -1,0 +1,50 @@
+# Lesson 9. A more robust shape.
+#
+# Expected problems and unexpected problems are not the same.
+#
+# addReview can fail because you already reviewed the book, or because the
+# book id is wrong. Those are userErrors on the payload. data is still
+# present. The UI can show the strings next to the form.
+#
+# Header for this mutation: { "Authorization": "Bearer reader-token" }
+# Amina already reviewed book 1, so the first call returns a userError.
+#
+# A missing token is not a userError. The guard throws, data is null, and
+# the errors array has the code. The client cannot fix that by editing a field.
+#
+# serviceInfo tells a caller how this process is exposed, without pretending
+# that GraphQL is the only route. GET /health is the route a load balancer
+# should call. Shutdown hooks are enabled in main.ts so the process can
+# close the websocket server when it is asked to stop.
+
+query Service {
+  serviceInfo {
+    name
+    graphqlPath
+    transports
+    introspectionEnabled
+  }
+}
+
+mutation ReviewAgain($input: AddReviewInput!) {
+  addReview(input: $input) {
+    review {
+      id
+      reviewerName
+    }
+    userErrors
+  }
+}
+
+# Variables:
+# {
+#   "input": {
+#     "bookId": "1",
+#     "rating": 5,
+#     "body": "Read it again."
+#   }
+# }
+#
+# Try bookId "missing" as well. The payload explains it. The reviewer name
+# is the signed-in user. The input has no reviewerName field, so the client
+# cannot claim to be someone else.

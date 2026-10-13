@@ -1,0 +1,32 @@
+# Lesson 2b. Subscriptions.
+#
+# A subscription does not return one answer. It stays open and receives a
+# payload each time the event happens. This server uses the graphql-ws
+# protocol on the same URL as queries: ws://localhost:3000/graphql
+# GraphiQL speaks that protocol. HTTP does not.
+#
+# 1. Open two browser tabs on http://localhost:3000/graphql
+# 2. In the first tab, run Listen. The play button stays active.
+# 3. In the second tab, set the librarian header and run the createBook
+#    mutation from 01-mutations.graphql.
+# 4. The first tab receives the new book.
+#
+# authorId is a filter. Omit it to hear about every book. Set it to "a2"
+# and a book for author a1 will not be delivered to this listener.
+#
+# The in-memory pub/sub only reaches clients connected to this process.
+# A second server would need Redis or a queue. See LibraryPubSub.
+
+subscription Listen($authorId: ID) {
+  bookCreated(authorId: $authorId) {
+    id
+    title
+    year
+    author {
+      name
+    }
+  }
+}
+
+# Variables for every book: {}
+# Variables for one author: { "authorId": "a2" }

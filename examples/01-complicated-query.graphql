@@ -1,0 +1,57 @@
+# Lesson 1c. One operation that uses the pieces together.
+#
+# Operation name: LibraryTour. If you paste the whole file, select that name.
+# Variables:
+# {
+#   "bookId": "1",
+#   "withAuthor": true,
+#   "minRating": 5
+# }
+#
+# What to look at in the response:
+# - `catalog` and `featured` are aliases of different fields.
+# - `highReviews` is an alias of `reviews`, because the same field is used
+#   twice and each use has different arguments... here it is used once, with
+#   a name that says what the argument did.
+# - BookCard is shared. shoutedTitle is the title after the server uppercases it.
+# - authorName is present only when $withAuthor is false, because of @skip.
+# - author is present only when $withAuthor is true, because of @include.
+
+query LibraryTour($bookId: ID!, $withAuthor: Boolean!, $minRating: Int!) {
+  catalog: books(search: "clean") {
+    ...BookCard
+    highReviews: reviews(minRating: $minRating) {
+      ...ReviewCard
+    }
+  }
+  featured: book(id: $bookId) {
+    ...BookCard
+    authorName @skip(if: $withAuthor)
+  }
+  authorFocus: book(id: "2") {
+    title
+    author {
+      name
+      books {
+        title
+      }
+    }
+  }
+}
+
+fragment BookCard on Book {
+  id
+  title
+  year
+  shoutedTitle
+  author @include(if: $withAuthor) {
+    id
+    name
+  }
+}
+
+fragment ReviewCard on Review {
+  rating
+  body
+  reviewerName
+}

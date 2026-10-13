@@ -1,0 +1,56 @@
+# Lesson 1b. Aliases, operation names, variables, fragments, directives.
+#
+# Alias: two fields would both be called `book`, so the response could not
+# tell them apart. `pragmatic:` and `clean:` are the names in the JSON.
+#
+# Operation name: this document has two operations. In GraphiQL, pick
+# CompareBooks or SearchClean from the dropdown. A document with more than
+# one operation is invalid until you name the one to run.
+#
+# Variables: the document stays the same. Only the JSON variables change.
+# GraphiQL has a Variables panel under the editor.
+#
+# Fragment: BookCard is a selection you can reuse. The response does not
+# contain the fragment. The server inlines it before resolving.
+#
+# Directives:
+#   @include(if: $withAuthor) drops `author` when the variable is false.
+#   @skip(if: $withAuthor) drops the deprecated `authorName` when you already
+#   asked for the author. The engine does this before the resolver runs.
+#   authorName is @deprecated in the schema. GraphiQL shows a warning.
+
+query CompareBooks($withAuthor: Boolean!) {
+  pragmatic: book(id: "1") {
+    ...BookCard
+    authorName @skip(if: $withAuthor)
+  }
+  clean: book(id: "2") {
+    ...BookCard
+  }
+}
+
+query SearchClean($withAuthor: Boolean!, $minRating: Int!) {
+  books(search: "clean") {
+    ...BookCard
+    highReviews: reviews(minRating: $minRating) {
+      rating
+      body
+    }
+  }
+}
+
+fragment BookCard on Book {
+  id
+  title
+  year
+  shoutedTitle
+  author @include(if: $withAuthor) {
+    name
+  }
+}
+
+# Variables for CompareBooks:
+# { "withAuthor": true }
+#
+# Variables for SearchClean:
+# { "withAuthor": false, "minRating": 5 }

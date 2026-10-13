@@ -1,0 +1,23 @@
+# Lesson 6. Caching. There are two layers in this project.
+#
+# 1. Application cache. libraryStats remembers the counts for 15 seconds.
+#    Call this query twice. The second response has fromCache: true and the
+#    same computedAt. Restarting the process empties it. Every caller of this
+#    process shares it. See LibraryCacheService.
+#
+# 2. HTTP cache. The same field asks Apollo to set Cache-Control: max-age=15
+#    on the response. Browsers and CDNs honor that header on GET, not on the
+#    POST that GraphiQL sends. The GET is in
+#    examples/03-serving-graphql-over-http.http and in the end-to-end test.
+#
+# A client cache (Apollo Client, urql) is a third layer. It lives in the
+# browser and is not part of this server.
+
+query CachedLibraryStats {
+  libraryStats {
+    bookCount
+    reviewCount
+    fromCache
+    computedAt
+  }
+}

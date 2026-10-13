@@ -1,0 +1,185 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+input AddReviewInput {
+  body: String!
+  bookId: ID!
+  rating: Int!
+}
+
+type AddReviewPayload {
+  review: Review
+  userErrors: [String!]!
+}
+
+"""A person who wrote one or more books"""
+type Author {
+  """Books by this author. Loaded in one batch for the whole request."""
+  books: [Book!]!
+  id: ID!
+  name: String!
+}
+
+"""A book in the catalog"""
+type Book {
+  author: Author!
+  authorName: String! @deprecated(reason: "Use author { name } instead.")
+  cover: BookCover
+  id: ID!
+  internalNote: String
+
+  """Pass minRating to drop weaker reviews. This is a field argument."""
+  reviews(minRating: Int): [Review!]!
+
+  """The title in uppercase. Wrapped after the resolver returns."""
+  shoutedTitle: String!
+  title: String!
+  year: Int!
+}
+
+"""One window of the book list, plus how to ask for the next window"""
+type BookConnection {
+  edges: [BookEdge!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+"""A cover image stored beside the book, not inside the JSON"""
+type BookCover {
+  filename: String!
+  mimeType: String!
+  size: Int!
+  uploadId: String!
+
+  """HTTP path that streams the bytes"""
+  url: String!
+}
+
+type BookEdge {
+  """Pass this back as `after` to read the next page"""
+  cursor: String!
+  node: Book!
+}
+
+"""A page of books, counted from page 1"""
+type BookPage {
+  items: [Book!]!
+  page: Int!
+  pageSize: Int!
+  totalCount: Int!
+  totalPages: Int!
+}
+
+input CreateBookInput {
+  authorId: ID!
+  internalNote: String
+  title: String!
+  year: Int!
+}
+
+"""What the signed-in person is allowed to do"""
+enum LibraryRole {
+  LIBRARIAN
+  READER
+}
+
+"""Counts that are safe to reuse for a few seconds"""
+type LibraryStats {
+  bookCount: Int!
+  computedAt: String!
+  fromCache: Boolean!
+  reviewCount: Int!
+}
+
+"""The person behind the current request"""
+type LibraryUser {
+  name: String!
+  role: LibraryRole!
+}
+
+type Mutation {
+  """
+  Expected problems come back in userErrors. The reviewer name is the signed-in user.
+  """
+  addReview(input: AddReviewInput!): AddReviewPayload!
+
+  """Link a file previously posted to POST /uploads/covers."""
+  attachCover(bookId: ID!, uploadId: ID!): Book!
+
+  """Librarian only. Publishes bookCreated."""
+  createBook(input: CreateBookInput!): Book!
+  deleteBook(id: ID!): Boolean!
+  updateBook(id: ID!, input: UpdateBookInput!): Book!
+
+  """
+  Attach a base64 image. Handy in GraphiQL. Prefer the HTTP upload for real files.
+  """
+  uploadBookCover(input: UploadCoverInput!): Book!
+}
+
+type PageInfo {
+  endCursor: String
+  hasNextPage: Boolean!
+}
+
+type Query {
+  """One book. The id argument selects which row."""
+  book(id: ID!): Book!
+
+  """
+  Every matching book, capped at 20. Use booksPage or booksConnection for a real list.
+  """
+  books(search: String): [Book!]!
+
+  """Cursor pagination. first is at most 10."""
+  booksConnection(after: String, first: Int! = 2, search: String): BookConnection!
+
+  """Offset pagination. page starts at 1."""
+  booksPage(page: Int! = 1, pageSize: Int! = 2, search: String): BookPage!
+
+  """Cached for 15 seconds. Call it twice and watch fromCache."""
+  libraryStats: LibraryStats!
+
+  """Null until the request carries a known bearer token"""
+  me: LibraryUser
+
+  """Plain facts about the HTTP and websocket endpoints"""
+  serviceInfo: ServiceInfo!
+}
+
+"""A short opinion about one book"""
+type Review {
+  body: String!
+  id: ID!
+  rating: Int!
+
+  """Taken from the signed-in user, not from the input"""
+  reviewerName: String!
+}
+
+"""How this process is serving GraphQL"""
+type ServiceInfo {
+  graphqlPath: String!
+  introspectionEnabled: Boolean!
+  name: String!
+  transports: [String!]!
+}
+
+type Subscription {
+  bookCreated(authorId: ID): Book!
+}
+
+input UpdateBookInput {
+  authorId: ID
+  internalNote: String
+  title: String
+  year: Int
+}
+
+input UploadCoverInput {
+  bookId: ID!
+  contentBase64: String!
+  filename: String!
+  mimeType: String!
+}

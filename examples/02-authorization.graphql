@@ -1,0 +1,25 @@
+# Lesson 2a. Authorization.
+#
+# The token is not a GraphQL argument. It is an HTTP header, because the
+# identity is about the request, not about one field.
+#
+# Headers panel:
+#   anonymous:     (no Authorization header)
+#   reader:        { "Authorization": "Bearer reader-token" }
+#   librarian:     { "Authorization": "Bearer librarian-token" }
+#
+# `me` is whoever the header resolved to.
+# `internalNote` is a field on a public book. The book loads either way.
+# The note is null unless the caller is a librarian. One forbidden field
+# does not fail the rest of the selection.
+
+query WhoAmI {
+  me {
+    name
+    role
+  }
+  book(id: "1") {
+    title
+    internalNote
+  }
+}

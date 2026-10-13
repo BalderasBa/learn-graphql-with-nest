@@ -1,0 +1,48 @@
+# Lesson 1d. Mutations.
+#
+# A mutation changes data. It is still a selection: you ask for the fields of
+# the book that was created. Open the Headers panel and send:
+#
+# { "Authorization": "Bearer librarian-token" }
+#
+# reader-token is rejected. No header is rejected. Queries do not need a token.
+# Run these one at a time. Each operation has a name.
+
+mutation CreateBook($input: CreateBookInput!) {
+  createBook(input: $input) {
+    id
+    title
+    year
+    author {
+      name
+    }
+  }
+}
+
+# Variables:
+# {
+#   "input": {
+#     "title": "Test Driven Development",
+#     "authorId": "a2",
+#     "year": 2002,
+#     "internalNote": "Purchased for the course"
+#   }
+# }
+
+mutation RenameBook($id: ID!, $input: UpdateBookInput!) {
+  updateBook(id: $id, input: $input) {
+    id
+    title
+    year
+  }
+}
+
+# Variables: { "id": "1", "input": { "year": 2000 } }
+
+mutation RemoveBook($id: ID!) {
+  deleteBook(id: $id)
+}
+
+# Variables: { "id": "6" }
+# Do this last. It deletes a seed book from this process's memory.
+# Restart the server and the seed data comes back.

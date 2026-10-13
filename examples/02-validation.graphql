@@ -1,0 +1,26 @@
+# Lesson 2c. Validation.
+#
+# GraphQL checks the shape: year must be an Int, title must be a String.
+# class-validator checks the meaning: a year of 1200 is an Int and still
+# not a publication year. IsPublicationYear is the custom rule.
+#
+# Header: { "Authorization": "Bearer librarian-token" }
+#
+# The response is an error, not a book. `extensions.details` lists the
+# class-validator messages. The stack trace is not included.
+
+mutation InvalidBook($input: CreateBookInput!) {
+  createBook(input: $input) {
+    id
+    title
+  }
+}
+
+# Variables:
+# {
+#   "input": {
+#     "title": "",
+#     "authorId": "a1",
+#     "year": 1200
+#   }
+# }

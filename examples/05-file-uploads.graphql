@@ -1,0 +1,52 @@
+# Lesson 5. File uploads.
+#
+# GraphQL responses are JSON. A cover image does not belong in that JSON.
+# The BookCover type carries the filename, the size, and an HTTP url.
+# The bytes are downloaded with a normal GET to that url.
+#
+# Two ways to store a cover:
+#
+# A. Stay in GraphiQL. uploadBookCover takes base64. Fine for this 1x1 PNG.
+#    Header: { "Authorization": "Bearer librarian-token" }
+#
+# B. A real file. POST the bytes to /uploads/covers as multipart form field
+#    "file", with the same Authorization header. The JSON response has an
+#    uploadId. Then run attachCover with that id. The HTTP route is in
+#    UploadsController. Apollo does not parse multipart GraphQL bodies.
+
+mutation UploadTinyCover($input: UploadCoverInput!) {
+  uploadBookCover(input: $input) {
+    id
+    title
+    cover {
+      uploadId
+      filename
+      mimeType
+      size
+      url
+    }
+  }
+}
+
+# Variables. The string is a 1x1 PNG, the same bytes as SAMPLE_PNG_BASE64.
+# {
+#   "input": {
+#     "bookId": "1",
+#     "filename": "dot.png",
+#     "mimeType": "image/png",
+#     "contentBase64": "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg=="
+#   }
+# }
+#
+# Then open the url from the response, for example:
+# http://localhost:3000/uploads/covers/<uploadId>
+
+mutation AttachUploadedCover($bookId: ID!, $uploadId: ID!) {
+  attachCover(bookId: $bookId, uploadId: $uploadId) {
+    title
+    cover {
+      filename
+      url
+    }
+  }
+}

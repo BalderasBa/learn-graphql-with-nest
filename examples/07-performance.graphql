@@ -1,0 +1,31 @@
+# Lesson 7. Performance.
+#
+# This selection looks like one query. It is several resolver calls.
+# books runs once. Each book's author would run once per book if the code
+# loaded authors inside a loop. Six books would be six author queries.
+# That is the N+1 problem.
+#
+# The author field uses a DataLoader created for this request only.
+# It collects the ids and loads them in one batch. The response extension
+# loaderBatches.authorBatches should be 1, not 6.
+#
+# author { books } is the same idea in the other direction. One batch loads
+# the books for every author that was selected.
+#
+# The extension is for this classroom. Do not ship it. It describes the
+# server's internals. See loader-stats.plugin.ts and author.loader.ts.
+#
+# Depth here is 4 (books, author, books, title). The limit is 5.
+# Going one level deeper is rejected. That example is in 08-security.graphql.
+
+query NestedBooks {
+  books {
+    title
+    author {
+      name
+      books {
+        title
+      }
+    }
+  }
+}

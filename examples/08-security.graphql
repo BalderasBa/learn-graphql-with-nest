@@ -1,0 +1,84 @@
+# Lesson 8. Security. These documents are for THIS server, so you can see
+# your own limits reject a selection. They are not a tool for anyone else's API.
+#
+# Depth. Each nested field is a level. Fragments count too. The limit is 5.
+# This document is 6 levels and comes back as an error. The resolvers never run.
+#
+# Cost. Every field costs 1. A list costs 5 more. Aliases are not free:
+# three copies of a wide selection cost three times as much. @include does
+# not make a field free either, because the variable can turn it on.
+# The limit is 50. TooExpensive is over that limit and is also rejected
+# before resolvers run.
+#
+# Other controls, in code rather than in these documents:
+# - Mutations require a librarian token. Reviews require any known token.
+# - internalNote is null for everyone else.
+# - Page size cannot exceed 10. Uploads cannot exceed 100 KB, and the bytes
+#   must actually be a PNG, JPEG, or WebP.
+# - Errors do not include stack traces.
+# - Introspection is off when NODE_ENV is production.
+# - GET without a preflight header is rejected, and mutations cannot use GET.
+# - The rate limiter counts requests per socket address in this process.
+#   It will not stop a fleet of servers. A real deployment limits at the edge.
+
+query TooDeep {
+  books {
+    author {
+      books {
+        author {
+          books {
+            title
+          }
+        }
+      }
+    }
+  }
+}
+
+query TooExpensive {
+  one: books {
+    id
+    title
+    year
+    author {
+      id
+      name
+    }
+    reviews {
+      id
+      rating
+      body
+      reviewerName
+    }
+  }
+  two: books {
+    id
+    title
+    year
+    author {
+      id
+      name
+    }
+    reviews {
+      id
+      rating
+      body
+      reviewerName
+    }
+  }
+  three: books {
+    id
+    title
+    year
+    author {
+      id
+      name
+    }
+    reviews {
+      id
+      rating
+      body
+      reviewerName
+    }
+  }
+}

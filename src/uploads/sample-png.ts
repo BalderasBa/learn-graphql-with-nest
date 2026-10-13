@@ -1,0 +1,3 @@
+/** A 1x1 PNG. Small enough to paste into GraphiQL. */
+export const SAMPLE_PNG_BASE64 =
+  'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==';
